@@ -1,0 +1,33 @@
+<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="48" height="48" fill="#4285f4" rx="6"/>
+  
+  <!-- 메인 이미지 프레임 -->
+  <rect x="8" y="10" width="32" height="24" fill="white" rx="2" stroke="#e0e0e0" stroke-width="1"/>
+  
+  <!-- 이미지 내용 (산 모양) -->
+  <polygon points="10,28 16,20 20,22 28,16 32,22 38,28" fill="#34a853"/>
+  
+  <!-- 태양 -->
+  <circle cx="30" cy="17" r="3" fill="#fbbc04"/>
+  
+  <!-- 구름 -->
+  <ellipse cx="18" cy="15" rx="2" ry="1.5" fill="white" opacity="0.9"/>
+  <ellipse cx="20" cy="14" rx="1.5" ry="1" fill="white" opacity="0.9"/>
+  
+  <!-- 네비게이션 화살표 -->
+  <polygon points="4,24 8,20 8,28" fill="white" opacity="0.9"/>
+  <polygon points="44,24 40,20 40,28" fill="white" opacity="0.9"/>
+  
+  <!-- 키보드 힌트 -->
+  <rect x="12" y="38" width="4" height="4" fill="white" opacity="0.7" rx="1"/>
+  <rect x="18" y="38" width="4" height="4" fill="white" opacity="0.7" rx="1"/>
+  <rect x="26" y="38" width="4" height="4" fill="white" opacity="0.7" rx="1"/>
+  <rect x="32" y="38" width="4" height="4" fill="white" opacity="0.7" rx="1"/>
+  
+  <!-- 화살표 키 표시 -->
+  <polygon points="14,40 15,39 15,41" fill="#4285f4"/>
+  <polygon points="20,39 21,40 20,41" fill="#4285f4"/>
+  <polygon points="28,39 29,40 28,41" fill="#4285f4"/>
+  <polygon points="34,40 35,39 35,41" fill="#4285f4"/>
+</svg>

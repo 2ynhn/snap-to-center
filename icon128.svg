@@ -1,0 +1,80 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 그라데이션 -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4285f4"/>
+      <stop offset="100%" style="stop-color:#3367d6"/>
+    </linearGradient>
+    <linearGradient id="imageGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#f8f9fa"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- 배경 -->
+  <rect width="128" height="128" fill="url(#bgGradient)" rx="16"/>
+  
+  <!-- 그림자 -->
+  <rect x="22" y="28" width="84" height="60" fill="black" opacity="0.1" rx="4" transform="translate(2,2)"/>
+  
+  <!-- 메인 이미지 프레임 -->
+  <rect x="20" y="26" width="88" height="64" fill="url(#imageGradient)" rx="4" stroke="#e0e0e0" stroke-width="2"/>
+  
+  <!-- 이미지 내용 -->
+  <!-- 하늘 -->
+  <rect x="22" y="28" width="84" height="32" fill="#87ceeb" rx="2"/>
+  
+  <!-- 산 -->
+  <polygon points="22,60 35,40 50,45 70,35 85,45 106,60" fill="#228b22"/>
+  <polygon points="22,60 40,50 55,52 75,42 90,50 106,60" fill="#32cd32"/>
+  
+  <!-- 태양 -->
+  <circle cx="85" cy="40" r="8" fill="#ffd700"/>
+  <g stroke="#ffd700" stroke-width="2" opacity="0.8">
+    <line x1="85" y1="25" x2="85" y2="30"/>
+    <line x1="85" y1="50" x2="85" y2="55"/>
+    <line x1="70" y1="40" x2="75" y2="40"/>
+    <line x1="95" y1="40" x2="100" y2="40"/>
+    <line x1="74" y1="29" x2="78" y2="33"/>
+    <line x1="92" y1="47" x2="96" y2="51"/>
+    <line x1="96" y1="29" x2="92" y2="33"/>
+    <line x1="78" y1="47" x2="74" y2="51"/>
+  </g>
+  
+  <!-- 구름 -->
+  <g fill="white" opacity="0.9">
+    <ellipse cx="45" cy="35" rx="6" ry="4"/>
+    <ellipse cx="50" cy="33" rx="4" ry="3"/>
+    <ellipse cx="40" cy="33" rx="3" ry="2"/>
+  </g>
+  
+  <!-- 나무 -->
+  <rect x="60" y="50" width="3" height="10" fill="#8b4513"/>
+  <circle cx="61.5" cy="50" r="4" fill="#228b22"/>
+  
+  <!-- 네비게이션 화살표 -->
+  <g fill="white" opacity="0.9">
+    <polygon points="8,64 16,56 16,72"/>
+    <polygon points="120,64 112,56 112,72"/>
+  </g>
+  
+  <!-- 키보드 섹션 -->
+  <g transform="translate(20, 100)">
+    <!-- 키보드 베이스 -->
+    <rect x="0" y="0" width="88" height="20" fill="white" opacity="0.8" rx="3"/>
+    
+    <!-- 화살표 키들 -->
+    <g fill="#4285f4">
+      <rect x="30" y="4" width="12" height="12" rx="2" fill="white" stroke="#4285f4" stroke-width="1"/>
+      <rect x="44" y="4" width="12" height="12" rx="2" fill="white" stroke="#4285f4" stroke-width="1"/>
+      
+      <!-- 위 화살표 -->
+      <polygon points="36,8 39,5 42,8" fill="#4285f4"/>
+      <!-- 아래 화살표 -->
+      <polygon points="48,12 51,15 54,12" fill="#4285f4"/>
+    </g>
+    
+    <!-- 텍스트 힌트 -->
+    <text x="44" y="-5" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white" opacity="0.8">↑↓ Navigate</text>
+  </g>
+</svg>
