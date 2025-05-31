@@ -1,282 +1,294 @@
-class ImageNavigator {
+class MediaScrollNavigator {
   constructor() {
-    this.isActive = false;
-    this.images = [];
-    this.currentIndex = -1;
-    this.settings = { width: 200, height: 200, count: 3, alignment: 'center' };
-    this.userScrolled = false;
-    this.lastScrollPosition = 0;
-    
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.handleScroll = this.handleScroll.bind(this);
-    this.handleWheel = this.handleWheel.bind(this);
-  }
-  
-  // 조건에 맞는 이미지 찾기
-  findValidImages() {
-    const allImages = document.querySelectorAll('img');
-    const validImages = [];
-    
-    allImages.forEach(img => {
-      // 이미지가 로드되었고 보이는 상태인지 확인
-      if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
-        const rect = img.getBoundingClientRect();
-        const computedStyle = window.getComputedStyle(img);
-        
-        // display: none이나 visibility: hidden인 이미지 제외
-        if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') {
-          return;
-        }
-        
-        // 실제 렌더링된 크기가 조건을 만족하는지 확인
-        const width = Math.max(img.naturalWidth, rect.width);
-        const height = Math.max(img.naturalHeight, rect.height);
-        
-        if (width >= this.settings.width && height >= this.settings.height) {
-          validImages.push({
-            element: img,
-            top: rect.top + window.scrollY,
-            width: width,
-            height: height
-          });
-        }
-      }
-    });
-    
-    // Y 좌표 기준으로 정렬
-    return validImages.sort((a, b) => a.top - b.top);
-  }
-  
-  // 현재 화면에 보이는 이미지 중 가장 가까운 이미지 찾기
-  findCurrentImageIndex() {
-    const scrollTop = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const centerY = scrollTop + windowHeight / 2;
-    
-    let closestIndex = 0;
-    let minDistance = Infinity;
-    
-    this.images.forEach((img, index) => {
-      const imgCenterY = img.top + img.height / 2;
-      const distance = Math.abs(imgCenterY - centerY);
-      
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestIndex = index;
-      }
-    });
-    
-    return closestIndex;
-  }
-  
-  // 이미지로 스크롤
-  scrollToImage(index) {
-    if (index < 0 || index >= this.images.length) {
-      return;
-    }
-    
-    const img = this.images[index];
-    const windowHeight = window.innerHeight;
-    let targetY;
-    
-    if (this.settings.alignment === 'top') {
-      // 이미지를 화면 상단에 정렬
-      targetY = img.top - 20; // 약간의 여백
-    } else {
-      // 이미지를 화면 중앙에 정렬 (기존 방식)
-      targetY = img.top - (windowHeight - img.height) / 2;
-    }
-    
-    window.scrollTo({
-      top: Math.max(0, targetY),
-      behavior: 'smooth'
-    });
-    
-    this.currentIndex = index;
-    this.userScrolled = false;
-    this.lastScrollPosition = window.scrollY;
-  }
-  
-  // 키보드 이벤트 처리
-  handleKeyDown(event) {
-    if (!this.isActive || this.images.length === 0) {
-      return;
-    }
-    
-    // 입력 요소에 포커스가 있으면 무시
-    const activeElement = document.activeElement;
-    if (activeElement && (
-      activeElement.tagName === 'INPUT' ||
-      activeElement.tagName === 'TEXTAREA' ||
-      activeElement.tagName === 'SELECT' ||
-      activeElement.tagName === 'BUTTON' ||
-      activeElement.tagName === 'A' ||
-      activeElement.isContentEditable
-    )) {
-      return;
-    }
-    
-    if (event.key === 'PageDown') {
-      event.preventDefault();
-      
-      // 사용자가 스크롤했으면 현재 위치 기준으로 다시 계산
-      if (this.userScrolled) {
-        this.currentIndex = this.findCurrentImageIndex();
-        this.userScrolled = false;
-      }
-      
-      const nextIndex = this.currentIndex + 1;
-      if (nextIndex < this.images.length) {
-        this.scrollToImage(nextIndex);
-      }
-    } else if (event.key === 'PageUp') {
-      event.preventDefault();
-      
-      // 사용자가 스크롤했으면 현재 위치 기준으로 다시 계산
-      if (this.userScrolled) {
-        this.currentIndex = this.findCurrentImageIndex();
-        this.userScrolled = false;
-      }
-      
-      const prevIndex = this.currentIndex - 1;
-      if (prevIndex >= 0) {
-        this.scrollToImage(prevIndex);
-      }
-    }
-  }
-  
-  // 스크롤 이벤트 처리
-  handleScroll() {
-    if (!this.isActive) return;
-    
-    const currentScrollPosition = window.scrollY;
-    const scrollDifference = Math.abs(currentScrollPosition - this.lastScrollPosition);
-    
-    // 스크롤 차이가 50px 이상이면 사용자가 직접 스크롤한 것으로 판단
-    if (scrollDifference > 50) {
-      this.userScrolled = true;
-    }
-  }
-  
-  // 마우스 휠 이벤트 처리
-  handleWheel() {
-    if (!this.isActive) return;
-    this.userScrolled = true;
-  }
-  
-  // 페이지 업/다운 및 기타 네비게이션 키 처리
-  handlePageNavigation(event) {
-    if (!this.isActive) return;
-    
-    // PageUp/PageDown은 이미지 탐색용으로 사용하므로 여기서는 제외
-    if (event.key === 'Home' || event.key === 'End') {
-      this.userScrolled = true;
-    }
-  }
-  
-  // 탐색 시작
-  start(settings) {
-    this.settings = { ...this.settings, ...settings };
-    this.images = this.findValidImages();
-    
-    if (this.images.length < this.settings.count) {
-      return {
-        success: false,
-        message: `조건에 맞는 이미지가 ${this.images.length}개만 발견되었습니다. (최소 ${this.settings.count}개 필요)`
+      this.settings = {
+          minWidth: 200,
+          minHeight: 200,
+          minCount: 3,
+          autoRun: false
       };
-    }
-    
-    this.isActive = true;
-    this.currentIndex = this.findCurrentImageIndex();
-    this.lastScrollPosition = window.scrollY;
-    
-    // 이벤트 리스너 추가
-    document.addEventListener('keydown', this.handleKeyDown);
-    document.addEventListener('keydown', (e) => this.handlePageNavigation(e));
-    window.addEventListener('scroll', this.handleScroll, { passive: true });
-    window.addEventListener('wheel', this.handleWheel, { passive: true });
-    
-    return {
-      success: true,
-      imageCount: this.images.length
-    };
+      this.mediaElements = [];
+      this.isActive = false;
+      this.currentIndex = -1;
+      this.updateInterval = null;
+      this.lastScrollTime = 0;
+      this.userScrolled = false;
+      
+      this.init();
   }
-  
-  // 탐색 중지
-  stop() {
-    this.isActive = false;
-    this.currentIndex = -1;
-    this.userScrolled = false;
-    
-    // 이벤트 리스너 제거
-    document.removeEventListener('keydown', this.handleKeyDown);
-    window.removeEventListener('scroll', this.handleScroll);
-    window.removeEventListener('wheel', this.handleWheel);
-    
-    return { success: true };
+
+  init() {
+      this.loadSettings().then(() => {
+          if (this.settings.autoRun) {
+              this.activate();
+          }
+      });
+      
+      // 키보드 이벤트 리스너
+      document.addEventListener('keydown', this.handleKeyDown.bind(this));
+      
+      // 스크롤 감지
+      document.addEventListener('scroll', this.handleScroll.bind(this));
+      document.addEventListener('wheel', this.handleUserScroll.bind(this));
+      document.addEventListener('keydown', this.handleArrowKeys.bind(this));
+      
+      // 메시지 리스너 (팝업에서 설정 변경 알림)
+      chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+          if (request.action === 'updateSettings') {
+              this.settings = request.settings;
+              this.checkAndActivate();
+          }
+      });
   }
-  
-  // 상태 토글
-  toggle(settings) {
-    if (this.isActive) {
-      return this.stop();
-    } else {
-      return this.start(settings);
-    }
+
+  async loadSettings() {
+      return new Promise((resolve) => {
+          chrome.storage.sync.get(this.settings, (result) => {
+              this.settings = result;
+              resolve();
+          });
+      });
   }
-  
-  // 현재 상태 반환
-  getStatus() {
-    return {
-      isActive: this.isActive,
-      imageCount: this.images.length
-    };
+
+  activate() {
+      this.updateMediaElements();
+      if (this.mediaElements.length >= this.settings.minCount) {
+          this.isActive = true;
+          this.startUpdateInterval();
+          console.log(`미디어 스크롤 활성화: ${this.mediaElements.length}개 미디어 감지`);
+      } else {
+          this.deactivate();
+      }
+  }
+
+  deactivate() {
+      this.isActive = false;
+      this.stopUpdateInterval();
+      this.currentIndex = -1;
+      console.log('미디어 스크롤 비활성화');
+  }
+
+  checkAndActivate() {
+      this.updateMediaElements();
+      if (this.mediaElements.length >= this.settings.minCount) {
+          if (!this.isActive) {
+              this.activate();
+          }
+      } else {
+          this.deactivate();
+      }
+  }
+
+  startUpdateInterval() {
+      this.stopUpdateInterval();
+      this.updateInterval = setInterval(() => {
+          this.updateMediaElements();
+          if (this.mediaElements.length < this.settings.minCount) {
+              this.deactivate();
+          }
+      }, 3000);
+  }
+
+  stopUpdateInterval() {
+      if (this.updateInterval) {
+          clearInterval(this.updateInterval);
+          this.updateInterval = null;
+      }
+  }
+
+  updateMediaElements() {
+      const elements = [];
+      const imgs = document.querySelectorAll('img');
+      const videos = document.querySelectorAll('video');
+      
+      [...imgs, ...videos].forEach(el => {
+          // 숨겨진 요소 제외
+          if (el.offsetWidth === 0 || el.offsetHeight === 0) return;
+          
+          const rect = el.getBoundingClientRect();
+          const computedStyle = window.getComputedStyle(el);
+          
+          // display:none이나 visibility:hidden 제외
+          if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') return;
+          
+          // 실제 크기나 CSS 크기 중 하나라도 조건 만족하면 포함
+          const actualWidth = el.naturalWidth || el.videoWidth || rect.width;
+          const actualHeight = el.naturalHeight || el.videoHeight || rect.height;
+          const cssWidth = rect.width;
+          const cssHeight = rect.height;
+          
+          if ((actualWidth >= this.settings.minWidth && actualHeight >= this.settings.minHeight) ||
+              (cssWidth >= this.settings.minWidth && cssHeight >= this.settings.minHeight)) {
+              elements.push({
+                  element: el,
+                  top: rect.top + window.scrollY,
+                  width: Math.max(actualWidth, cssWidth),
+                  height: Math.max(actualHeight, cssHeight)
+              });
+          }
+      });
+      
+      // Y 좌표 순으로 정렬
+      elements.sort((a, b) => a.top - b.top);
+      this.mediaElements = elements;
+  }
+
+  handleKeyDown(e) {
+      // 입력 요소에 포커스가 있으면 무시
+      const activeElement = document.activeElement;
+      if (activeElement && (
+          activeElement.tagName === 'INPUT' ||
+          activeElement.tagName === 'TEXTAREA' ||
+          activeElement.tagName === 'BUTTON' ||
+          activeElement.tagName === 'A' ||
+          activeElement.isContentEditable
+      )) {
+          return;
+      }
+
+      if (!this.isActive) {
+          return; // 기본 동작 허용
+      }
+
+      if (e.key === 'PageDown') {
+          e.preventDefault();
+          this.scrollToNext();
+      } else if (e.key === 'PageUp') {
+          e.preventDefault();
+          this.scrollToPrevious();
+      }
+  }
+
+  handleScroll() {
+      this.lastScrollTime = Date.now();
+  }
+
+  handleUserScroll(e) {
+      if (e.deltaY !== 0) {
+          this.userScrolled = true;
+          setTimeout(() => {
+              this.userScrolled = false;
+          }, 100);
+      }
+  }
+
+  handleArrowKeys(e) {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          this.userScrolled = true;
+          setTimeout(() => {
+              this.userScrolled = false;
+          }, 100);
+      }
+  }
+
+  getCurrentVisibleMedia() {
+      const viewportTop = window.scrollY;
+      const viewportBottom = viewportTop + window.innerHeight;
+      
+      // 현재 화면에 보이는 미디어들을 찾기
+      const visibleMedias = [];
+      
+      this.mediaElements.forEach((media, index) => {
+          const mediaTop = media.top;
+          const mediaBottom = mediaTop + media.height;
+          
+          // 화면에 보이는 미디어인지 확인 (일부라도 보이면 포함)
+          if (mediaBottom > viewportTop && mediaTop < viewportBottom) {
+              // 화면에 보이는 영역 비율 계산
+              const visibleTop = Math.max(mediaTop, viewportTop);
+              const visibleBottom = Math.min(mediaBottom, viewportBottom);
+              const visibleHeight = visibleBottom - visibleTop;
+              const visibilityRatio = visibleHeight / media.height;
+              
+              visibleMedias.push({
+                  index: index,
+                  visibilityRatio: visibilityRatio,
+                  top: mediaTop
+              });
+          }
+      });
+      
+      if (visibleMedias.length === 0) {
+          return -1;
+      }
+      
+      // 가장 많이 보이는 미디어를 우선으로, 같다면 위쪽에 있는 것을 선택
+      visibleMedias.sort((a, b) => {
+          if (Math.abs(a.visibilityRatio - b.visibilityRatio) < 0.1) {
+              return a.top - b.top; // 비슷한 가시성이면 위쪽 우선
+          }
+          return b.visibilityRatio - a.visibilityRatio; // 더 많이 보이는 것 우선
+      });
+      
+      return visibleMedias[0].index;
+  }
+
+  scrollToNext() {
+      if (this.mediaElements.length === 0) return;
+      
+      let targetIndex;
+      const currentVisible = this.getCurrentVisibleMedia();
+      
+      if (currentVisible === -1) {
+          // 현재 보이는 미디어가 없으면 첫 번째 미디어로
+          targetIndex = 0;
+      } else {
+          // 현재 보이는 미디어의 다음 미디어로
+          targetIndex = currentVisible + 1;
+      }
+      
+      if (targetIndex >= this.mediaElements.length) {
+          return; // 마지막 미디어에 도달했으면 아무것도 하지 않음
+      }
+      
+      this.currentIndex = targetIndex;
+      this.scrollToMedia(targetIndex);
+  }
+
+  scrollToPrevious() {
+      if (this.mediaElements.length === 0) return;
+      
+      let targetIndex;
+      const currentVisible = this.getCurrentVisibleMedia();
+      
+      if (currentVisible === -1) {
+          // 현재 보이는 미디어가 없으면 마지막 미디어로
+          targetIndex = this.mediaElements.length - 1;
+      } else {
+          // 현재 보이는 미디어의 이전 미디어로
+          targetIndex = currentVisible - 1;
+      }
+      
+      if (targetIndex < 0) {
+          return; // 첫 번째 미디어에 도달했으면 아무것도 하지 않음
+      }
+      
+      this.currentIndex = targetIndex;
+      this.scrollToMedia(targetIndex);
+  }
+
+  scrollToMedia(index) {
+      if (index < 0 || index >= this.mediaElements.length) return;
+      
+      const media = this.mediaElements[index];
+      const targetScrollY = media.top - 20; // 약간 여백을 두고 표시
+      
+      window.scrollTo({
+          top: Math.max(0, targetScrollY),
+          behavior: 'smooth'
+      });
+      
+      // 스크롤 후 사용자 스크롤 플래그 리셋
+      setTimeout(() => {
+          this.userScrolled = false;
+      }, 500);
   }
 }
 
-// 전역 네비게이터 인스턴스
-const navigator = new ImageNavigator();
-
-// 메시지 리스너
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'toggleNavigation') {
-    const result = navigator.toggle(request.settings);
-    sendResponse({
-      isActive: navigator.isActive,
-      imageCount: navigator.images.length,
-      message: result.success ? undefined : result.message
-    });
-  } else if (request.action === 'getStatus') {
-    sendResponse(navigator.getStatus());
-  }
-  
-  return true;
-});
-
-// 페이지 로드시 자동 실행
-chrome.storage.sync.get(['autoRun', 'width', 'height', 'count', 'alignment'], (result) => {
-  if (result.autoRun) {
-    // DOM이 완전히 로드된 후 실행
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-          navigator.start({
-            width: result.width || 200,
-            height: result.height || 200,
-            count: result.count || 3,
-            alignment: result.alignment || 'center'
-          });
-        }, 1000); // 이미지 로딩을 위한 추가 대기
-      });
-    } else {
-      setTimeout(() => {
-        navigator.start({
-          width: result.width || 200,
-          height: result.height || 200,
-          count: result.count || 3,
-          alignment: result.alignment || 'center'
-        });
-      }, 1000);
-    }
-  }
-});
+// 페이지 로드 시 초기화
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+      new MediaScrollNavigator();
+  });
+} else {
+  new MediaScrollNavigator();
+}
