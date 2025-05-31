@@ -94,6 +94,27 @@
       background: #e8f5e8;
       color: #2d5a2d;
     }
+    
+    .radio-group {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .radio-option {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+      color: #333;
+    }
+    
+    .radio-option input[type="radio"] {
+      margin-right: 6px;
+    }
+    
+    .radio-label {
+      min-width: auto;
+    }
   </style>
 </head>
 <body>
@@ -124,7 +145,21 @@
     </div>
   </div>
   
-  <button id="startNavigation">Navigate images with arrow keys</button>
+  <div class="section">
+    <div style="font-size: 13px; color: #333; margin-bottom: 8px;">Image Align:</div>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" name="alignment" value="center" checked>
+        <span class="radio-label">Center</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="alignment" value="top">
+        <span class="radio-label">Top</span>
+      </label>
+    </div>
+  </div>
+  
+  <button id="startNavigation">Navigate images with Page Down/Up</button>
   
   <div id="status" class="status">Set your preferences and click the button</div>
 

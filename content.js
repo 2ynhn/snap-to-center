@@ -3,7 +3,7 @@ class ImageNavigator {
     this.isActive = false;
     this.images = [];
     this.currentIndex = -1;
-    this.settings = { width: 200, height: 200, count: 3 };
+    this.settings = { width: 200, height: 200, count: 3, alignment: 'center' };
     this.userScrolled = false;
     this.lastScrollPosition = 0;
     
@@ -77,7 +77,15 @@ class ImageNavigator {
     
     const img = this.images[index];
     const windowHeight = window.innerHeight;
-    const targetY = img.top - (windowHeight - img.height) / 2;
+    let targetY;
+    
+    if (this.settings.alignment === 'top') {
+      // 이미지를 화면 상단에 정렬
+      targetY = img.top - 20; // 약간의 여백
+    } else {
+      // 이미지를 화면 중앙에 정렬 (기존 방식)
+      targetY = img.top - (windowHeight - img.height) / 2;
+    }
     
     window.scrollTo({
       top: Math.max(0, targetY),
@@ -108,7 +116,7 @@ class ImageNavigator {
       return;
     }
     
-    if (event.key === 'ArrowDown') {
+    if (event.key === 'PageDown') {
       event.preventDefault();
       
       // 사용자가 스크롤했으면 현재 위치 기준으로 다시 계산
@@ -121,7 +129,7 @@ class ImageNavigator {
       if (nextIndex < this.images.length) {
         this.scrollToImage(nextIndex);
       }
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === 'PageUp') {
       event.preventDefault();
       
       // 사용자가 스크롤했으면 현재 위치 기준으로 다시 계산
@@ -156,12 +164,12 @@ class ImageNavigator {
     this.userScrolled = true;
   }
   
-  // 페이지 업/다운 키 처리
+  // 페이지 업/다운 및 기타 네비게이션 키 처리
   handlePageNavigation(event) {
     if (!this.isActive) return;
     
-    if (event.key === 'PageDown' || event.key === 'PageUp' || 
-        event.key === 'Home' || event.key === 'End') {
+    // PageUp/PageDown은 이미지 탐색용으로 사용하므로 여기서는 제외
+    if (event.key === 'Home' || event.key === 'End') {
       this.userScrolled = true;
     }
   }
@@ -246,7 +254,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // 페이지 로드시 자동 실행
-chrome.storage.sync.get(['autoRun', 'width', 'height', 'count'], (result) => {
+chrome.storage.sync.get(['autoRun', 'width', 'height', 'count', 'alignment'], (result) => {
   if (result.autoRun) {
     // DOM이 완전히 로드된 후 실행
     if (document.readyState === 'loading') {
@@ -255,7 +263,8 @@ chrome.storage.sync.get(['autoRun', 'width', 'height', 'count'], (result) => {
           navigator.start({
             width: result.width || 200,
             height: result.height || 200,
-            count: result.count || 3
+            count: result.count || 3,
+            alignment: result.alignment || 'center'
           });
         }, 1000); // 이미지 로딩을 위한 추가 대기
       });
@@ -264,7 +273,8 @@ chrome.storage.sync.get(['autoRun', 'width', 'height', 'count'], (result) => {
         navigator.start({
           width: result.width || 200,
           height: result.height || 200,
-          count: result.count || 3
+          count: result.count || 3,
+          alignment: result.alignment || 'center'
         });
       }, 1000);
     }

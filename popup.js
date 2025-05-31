@@ -4,12 +4,19 @@ document.addEventListener('DOMContentLoaded', function() {
     width: 200,
     height: 200,
     count: 3,
-    autoRun: false
+    autoRun: false,
+    alignment: 'center'
   }, function(items) {
     document.getElementById('width').value = items.width;
     document.getElementById('height').value = items.height;
     document.getElementById('count').value = items.count;
     document.getElementById('autoRun').checked = items.autoRun;
+    
+    // 라디오 버튼 설정
+    const alignmentRadio = document.querySelector(`input[name="alignment"][value="${items.alignment}"]`);
+    if (alignmentRadio) {
+      alignmentRadio.checked = true;
+    }
   });
   
   // 현재 탭의 상태 확인
@@ -23,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (response && response.isActive) {
         document.getElementById('status').textContent = `탐색 활성화됨 (${response.imageCount}개 이미지)`;
         document.getElementById('status').className = 'status active';
-        document.getElementById('startNavigation').textContent = '이미지 탐색 중지';
+        document.getElementById('startNavigation').textContent = 'Page 탐색 중지';
       }
     });
   });
@@ -35,7 +42,8 @@ function saveSettings() {
     width: parseInt(document.getElementById('width').value),
     height: parseInt(document.getElementById('height').value),
     count: parseInt(document.getElementById('count').value),
-    autoRun: document.getElementById('autoRun').checked
+    autoRun: document.getElementById('autoRun').checked,
+    alignment: document.querySelector('input[name="alignment"]:checked').value
   };
   
   chrome.storage.sync.set(settings);
@@ -48,6 +56,11 @@ function saveSettings() {
 });
 
 document.getElementById('autoRun').addEventListener('change', saveSettings);
+
+// 라디오 버튼 변경시 자동 저장
+document.querySelectorAll('input[name="alignment"]').forEach(radio => {
+  radio.addEventListener('change', saveSettings);
+});
 
 // 탐색 시작/중지 버튼
 document.getElementById('startNavigation').addEventListener('click', function() {
@@ -69,11 +82,11 @@ document.getElementById('startNavigation').addEventListener('click', function() 
       if (response && response.isActive) {
         statusEl.textContent = `탐색 활성화됨 (${response.imageCount}개 이미지)`;
         statusEl.className = 'status active';
-        buttonEl.textContent = '이미지 탐색 중지';
+        buttonEl.textContent = 'Page 탐색 중지';
       } else {
         statusEl.textContent = response?.message || '탐색이 중지되었습니다';
         statusEl.className = 'status';
-        buttonEl.textContent = '화살표로 이미지 탐색';
+        buttonEl.textContent = 'Page로 이미지 탐색';
       }
     });
   });
